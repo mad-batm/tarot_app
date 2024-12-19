@@ -5,10 +5,10 @@ class SettingsScreen extends StatefulWidget {
   final Function(String) onDeckStyleChanged;
 
   const SettingsScreen({
-    Key? key,
+    super.key,
     required this.currentDeckStyle,
     required this.onDeckStyleChanged,
-  }) : super(key: key);
+  });
 
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
