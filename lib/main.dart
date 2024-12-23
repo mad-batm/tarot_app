@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'spread_selection_screen.dart';
 import 'virtual_deck_screen.dart';
+import 'change_notifier.dart';
 
 void main() {
-  runApp(TarotApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => DeckProvider(), // Создаем объект DeckProvider
+      child: TarotApp(),
+    ),
+  );
 }
 
 class TarotApp extends StatelessWidget {

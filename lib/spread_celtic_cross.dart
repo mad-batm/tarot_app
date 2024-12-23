@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:math';
+import 'change_notifier.dart';
 
 class SpreadCelticCross extends StatefulWidget {
   const SpreadCelticCross({super.key});
@@ -9,42 +11,6 @@ class SpreadCelticCross extends StatefulWidget {
 }
 
 class _SpreadCelticCrossState extends State<SpreadCelticCross> {
-  final List<String> deck = [
-    // Старшие арканы
-    'shut', 'mag', 'zhrica', 'impress', 'imperor',
-    'hierofant', 'lovers', 'chariot', 'strenghch', 'hermit',
-    'fortune', 'justise', 'hanged', 'death',
-    'temperam', 'devil', 'tower', 'stare', 'moon',
-    'sun', 'sud', 'world',
-
-    // Жезлы
-    'wands01', 'wands02', 'wands03', 'wands04',
-    'wands05', 'wands06', 'wands07', 'wands08',
-    'wands09', 'wands10', 'wands11', 'wands12',
-    'wands13', 'wands14',
-
-    // Кубки
-    'cups01', 'cups02', 'cups03', 'cups04',
-    'cups05', 'cups06', 'cups07', 'cups08',
-    'cups09', 'cups10', 'cups11', 'cups12',
-    'cups13', 'cups14',
-
-    // Мечи
-    'swords01', 'swords02', 'swords03', 'swords04',
-    'swords05', 'swords06', 'swords07', 'swords08',
-    'swords09', 'swords10', 'swords11', 'swords12',
-    'swords13', 'swords14',
-
-    // Пентакли
-    'pents01', 'pents02', 'pents03',
-    'pents04',
-    'pents05', 'pents06', 'pents07',
-    'pents08',
-    'pents09', 'pents10', 'pents11',
-    'pents12',
-    'pents13', 'pents14',
-  ];
-
   List<String> selectedCards = [];
   List<bool> cardVisible = List.generate(10, (_) => false);
 
@@ -55,6 +21,10 @@ class _SpreadCelticCrossState extends State<SpreadCelticCross> {
   }
 
   void _generateCelticCross() async {
+    // Получаем текущую колоду из провайдера с listen: true
+    final deckProvider = Provider.of<DeckProvider>(context, listen: false);
+    final deck = deckProvider.currentDeck;
+
     setState(() {
       // Перемешиваем колоду и берем первые 10 карт
       List<String> shuffledDeck = List.from(deck);
@@ -135,10 +105,8 @@ class _SpreadCelticCrossState extends State<SpreadCelticCross> {
         opacity: isVisible ? 1.0 : 0.0,
         duration: const Duration(milliseconds: 500),
         child: TweenAnimationBuilder(
-          tween: Tween<Offset>(
-            begin: const Offset(0, 0),
-            end: const Offset(0, 0), // Можно добавить изменения позиции здесь
-          ),
+          tween:
+              Tween<Offset>(begin: const Offset(0, 0), end: const Offset(0, 0)),
           duration: const Duration(milliseconds: 500),
           builder: (context, value, child) {
             return Transform.translate(
@@ -156,6 +124,10 @@ class _SpreadCelticCrossState extends State<SpreadCelticCross> {
   }
 
   Widget _buildCard(String cardName) {
+    // Получаем путь к изображениям из провайдера
+    final deckProvider = Provider.of<DeckProvider>(context);
+    final imagePath = deckProvider.currentDeckImagePath;
+
     return Container(
       width: 80,
       height: 120,
@@ -165,8 +137,11 @@ class _SpreadCelticCrossState extends State<SpreadCelticCross> {
         boxShadow: const [BoxShadow(blurRadius: 3, color: Colors.black26)],
       ),
       child: Image.asset(
-        'assets/images/$cardName.jpg',
+        '$imagePath$cardName.jpg', // Формируем путь к изображению с учетом текущей колоды
         fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(Icons.error);
+        },
       ),
     );
   }

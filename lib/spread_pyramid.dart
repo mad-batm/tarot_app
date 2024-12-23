@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:provider/provider.dart';
+import 'change_notifier.dart'; // Подключаем файл с вашим провайдером
 
 class SpreadPyramid extends StatefulWidget {
   const SpreadPyramid({super.key});
@@ -10,43 +12,6 @@ class SpreadPyramid extends StatefulWidget {
 
 class _SpreadPyramidState extends State<SpreadPyramid>
     with SingleTickerProviderStateMixin {
-  final List<String> deck = [
-    // Карты (для упрощения часть опущена)
-    // Старшие арканы
-    'shut', 'mag', 'zhrica', 'impress', 'imperor',
-    'hierofant', 'lovers', 'chariot', 'strenghch', 'hermit',
-    'fortune', 'justise', 'hanged', 'death',
-    'temperam', 'devil', 'tower', 'stare', 'moon',
-    'sun', 'sud', 'world',
-
-    // Жезлы
-    'wands01', 'wands02', 'wands03', 'wands04',
-    'wands05', 'wands06', 'wands07', 'wands08',
-    'wands09', 'wands10', 'wands11', 'wands12',
-    'wands13', 'wands14',
-
-    // Кубки
-    'cups01', 'cups02', 'cups03', 'cups04',
-    'cups05', 'cups06', 'cups07', 'cups08',
-    'cups09', 'cups10', 'cups11', 'cups12',
-    'cups13', 'cups14',
-
-    // Мечи
-    'swords01', 'swords02', 'swords03', 'swords04',
-    'swords05', 'swords06', 'swords07', 'swords08',
-    'swords09', 'swords10', 'swords11', 'swords12',
-    'swords13', 'swords14',
-
-    // Пентакли
-    'pents01', 'pents02', 'pents03',
-    'pents04',
-    'pents05', 'pents06', 'pents07',
-    'pents08',
-    'pents09', 'pents10', 'pents11',
-    'pents12',
-    'pents13', 'pents14',
-  ];
-
   List<String> selectedCards = [];
   late AnimationController _controller;
 
@@ -57,7 +22,7 @@ class _SpreadPyramidState extends State<SpreadPyramid>
       vsync: this,
       duration: const Duration(seconds: 2), // Общая длительность анимации
     );
-    _generatePyramidCards();
+    _generatePyramidCards(); // Генерируем начальные карты
     _controller.forward(); // Запускаем анимацию при загрузке
   }
 
@@ -68,10 +33,11 @@ class _SpreadPyramidState extends State<SpreadPyramid>
   }
 
   void _generatePyramidCards() {
+    final deck = Provider.of<DeckProvider>(context, listen: false).currentDeck;
     final random = Random();
     setState(() {
       selectedCards = List.from(deck)..shuffle(random);
-      selectedCards = selectedCards.take(6).toList();
+      selectedCards = selectedCards.take(6).toList(); // Берем только 6 карт
     });
   }
 
@@ -121,8 +87,11 @@ class _SpreadPyramidState extends State<SpreadPyramid>
             padding: const EdgeInsets.only(bottom: 20.0), // Отступ снизу
             child: ElevatedButton(
               onPressed: () {
-                _generatePyramidCards();
-                _controller.forward(from: 0); // Перезапускаем анимацию
+                _controller.reverse().then((value) {
+                  // Обновляем колоду после завершения анимации
+                  _generatePyramidCards(); // Перетасовываем карты
+                  _controller.forward(from: 0); // Перезапускаем анимацию
+                });
               },
               child: const Text('Перетасовать карты'),
             ),
@@ -183,7 +152,7 @@ class _SpreadPyramidState extends State<SpreadPyramid>
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8.0),
           child: Image.asset(
-            'assets/images/$card.jpg',
+            '${Provider.of<DeckProvider>(context).currentDeckImagePath}$card.jpg', // Используем путь из провайдера
             fit: BoxFit.cover,
           ),
         ),

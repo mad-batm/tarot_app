@@ -1,61 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'change_notifier.dart';
 
-class VirtualDeckScreen extends StatefulWidget {
+class VirtualDeckScreen extends StatelessWidget {
   const VirtualDeckScreen({super.key});
 
   @override
-  _VirtualDeckScreenState createState() => _VirtualDeckScreenState();
-}
-
-class _VirtualDeckScreenState extends State<VirtualDeckScreen> {
-  List<String> deck = [
-    // Старшие арканы
-    'shut', 'mag', 'zhrica', 'impress', 'imperor',
-    'hierofant', 'lovers', 'chariot', 'strenghch', 'hermit',
-    'fortune', 'justise', 'hanged', 'death',
-    'temperam', 'devil', 'tower', 'stare', 'moon',
-    'sun', 'sud', 'world',
-
-    // Жезлы
-    'wands01', 'wands02', 'wands03', 'wands04',
-    'wands05', 'wands06', 'wands07', 'wands08',
-    'wands09', 'wands10', 'wands11', 'wands12',
-    'wands13', 'wands14',
-
-    // Кубки
-    'cups01', 'cups02', 'cups03', 'cups04',
-    'cups05', 'cups06', 'cups07', 'cups08',
-    'cups09', 'cups10', 'cups11', 'cups12',
-    'cups13', 'cups14',
-
-    // Мечи
-    'swords01', 'swords02', 'swords03', 'swords04',
-    'swords05', 'swords06', 'swords07', 'swords08',
-    'swords09', 'swords10', 'swords11', 'swords12',
-    'swords13', 'swords14',
-
-    // Пентакли
-    'pents01', 'pents02', 'pents03',
-    'pents04',
-    'pents05', 'pents06', 'pents07',
-    'pents08',
-    'pents09', 'pents10', 'pents11',
-    'pents12',
-    'pents13', 'pents14',
-  ];
-
-  // Функция для перемешивания колоды
-  void shuffleDeck() {
-    setState(() {
-      deck.shuffle();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Получаем текущую колоду и путь к изображениям из DeckProvider
+    final deckProvider = Provider.of<DeckProvider>(context);
+    final deck = deckProvider.currentDeck;
+    final imagePath = deckProvider.currentDeckImagePath;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Виртуальная колода'),
+        actions: [
+          // Кнопка для выбора колоды
+          PopupMenuButton<int>(
+            icon: const Icon(Icons.collections),
+            onSelected: (index) {
+              deckProvider.changeDeck(index); // Смена колоды по индексу
+            },
+            itemBuilder: (context) {
+              return [
+                PopupMenuItem(
+                  value: 0,
+                  child: Text('Классическая колода'),
+                ),
+                PopupMenuItem(
+                  value: 1,
+                  child: Text('Мистическая колода'),
+                ),
+              ];
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -74,27 +54,27 @@ class _VirtualDeckScreenState extends State<VirtualDeckScreen> {
                 children: [
                   Expanded(
                     child: Image.asset(
-                      'assets/images/${deck[index]}.jpg',
+                      '$imagePath${deck[index]}.jpg',
                       fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(Icons.error);
+                      },
                     ),
-                  ),
-                  Padding(
+                  )
+
+                  /*Padding(
                     padding: const EdgeInsets.all(3.0),
                     child: Text(
                       deck[index].replaceAll('_', ' ').toUpperCase(),
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontSize: 10),
                     ),
-                  ),
+                  ),*/
                 ],
               ),
             );
           },
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: shuffleDeck,
-        child: const Icon(Icons.shuffle),
       ),
     );
   }

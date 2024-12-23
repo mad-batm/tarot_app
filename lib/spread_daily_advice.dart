@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:provider/provider.dart';
+import 'change_notifier.dart';
 
 class SpreadDailyAdvice extends StatefulWidget {
   const SpreadDailyAdvice({super.key});
@@ -9,30 +11,8 @@ class SpreadDailyAdvice extends StatefulWidget {
 }
 
 class _SpreadDailyAdviceState extends State<SpreadDailyAdvice> {
-  final List<String> deck = [
-    'shut',
-    'mag',
-    'zhrica',
-    'impress',
-    'imperor',
-    'hierofant',
-    'lovers',
-    'chariot',
-    'strength',
-    'hermit',
-    'fortune',
-    'justise',
-    'hanged',
-    'death',
-    'temperam',
-    'devil',
-    'tower',
-    'stare',
-    'moon',
-    'sun',
-    'sud',
-    'world',
-  ];
+  late List<String> deck;
+  late String imagePath;
 
   String? selectedCard;
   bool _isLoading = true;
@@ -42,16 +22,23 @@ class _SpreadDailyAdviceState extends State<SpreadDailyAdvice> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Получаем данные из провайдера один раз
+    final deckProvider = Provider.of<DeckProvider>(context, listen: false);
+    deck = deckProvider.currentDeck;
+    imagePath = deckProvider.currentDeckImagePath;
+
+    // Загружаем изображения
     _preloadImages();
   }
 
   Future<void> _preloadImages() async {
-    for (String card in deck) {
+    for (String cardName in deck) {
       await precacheImage(
-        AssetImage('assets/images/$card.jpg'),
+        AssetImage('$imagePath$cardName.jpg'),
         context,
       );
     }
+
     setState(() {
       _isLoading = false;
       _drawDailyAdvice();
@@ -82,6 +69,9 @@ class _SpreadDailyAdviceState extends State<SpreadDailyAdvice> {
 
   @override
   Widget build(BuildContext context) {
+    final deckProvider = Provider.of<DeckProvider>(
+        context); // Получаем текущую колоду с listen: true для перерисовки UI
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Совет дня'),
@@ -122,7 +112,7 @@ class _SpreadDailyAdviceState extends State<SpreadDailyAdvice> {
                         borderRadius: BorderRadius.circular(12),
                         child: selectedCard != null
                             ? Image.asset(
-                                'assets/images/$selectedCard.jpg',
+                                '$imagePath${selectedCard!}.jpg', // Используем выбранную карту
                                 width: 150,
                                 height: 250,
                                 fit: BoxFit.cover,
