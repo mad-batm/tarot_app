@@ -54,60 +54,125 @@ class _SpreadThreeCardsState extends State<SpreadThreeCards>
       appBar: AppBar(
         title: const Text('Три карты'),
       ),
-      body: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(12.0),
-            child: Text(
-              'Этот расклад покажет прошлое, настоящее и будущее.',
-              style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-              textAlign: TextAlign.center,
+      body: StarryBackground( // Добавляем звездный фон
+        child: Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(12.0),
+              child: Text(
+                'Этот расклад покажет прошлое, настоящее и будущее.',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.white, // Белый цвет текста для контраста
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
-          ),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(selectedCards.length, (index) {
-                return AnimatedBuilder(
-                  animation: _animation,
-                  builder: (context, child) {
-                    final offset = Offset(0, 100 * (1 - _animation.value));
-                    return Transform.translate(
-                      offset: offset,
-                      child: Opacity(
-                        opacity: _animation.value,
-                        child: Card(
-                          elevation: 5,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: Image.asset(
-                              '$imagePath${selectedCards[index]}.jpg',
-                              width: 100,
-                              height: 150,
-                              fit: BoxFit.cover,
-                              key: ValueKey(selectedCards[index]),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: List.generate(selectedCards.length, (index) {
+                  return AnimatedBuilder(
+                    animation: _animation,
+                    builder: (context, child) {
+                      final offset = Offset(0, 100 * (1 - _animation.value));
+                      return Transform.translate(
+                        offset: offset,
+                        child: Opacity(
+                          opacity: _animation.value,
+                          child: Card(
+                            color: Colors.deepPurple.shade800, // Темный фон для карточек
+                            elevation: 5,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: Image.asset(
+                                '$imagePath${selectedCards[index]}.jpg',
+                                width: 100,
+                                height: 150,
+                                fit: BoxFit.cover,
+                                key: ValueKey(selectedCards[index]),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              }),
+                      );
+                    },
+                  );
+                }),
+              ),
             ),
-          ),
-          const SizedBox(height: 20), // Отступ между картами и кнопкой
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20.0), // Отступ снизу
-            child: ElevatedButton(
-              onPressed: _generateThreeCards,
-              child: const Text('Перетасовать карты'),
+            const SizedBox(height: 20), // Отступ между картами и кнопкой
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20.0), // Отступ снизу
+              child: ElevatedButton(
+                onPressed: _generateThreeCards,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple.shade600, // Темный цвет фона для кнопки
+                  foregroundColor: Colors.white, // Белый текст на кнопке
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12), // Размер кнопки
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12), // Округлые углы
+                  ),
+                ),
+                child: const Text('Перетасовать карты'),
+              ),
             ),
-          ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class StarryBackground extends StatelessWidget {
+  final Widget child;
+
+  const StarryBackground({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.deepPurple.shade900,
+            Colors.deepPurple.shade400,
+          ],
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Разбросанные звезды на фоне
+          ...List.generate(100, (index) => _buildStar(screenSize)),
+          child,
         ],
+      ),
+    );
+  }
+
+  // Функция для создания случайно расположенной звезды
+  Widget _buildStar(Size screenSize) {
+    final random = Random();
+    final double top = random.nextDouble() * screenSize.height;
+    final double left = random.nextDouble() * screenSize.width;
+
+    final double size = random.nextDouble() * 3 + 2;
+
+    return Positioned(
+      top: top,
+      left: left,
+      child: Icon(
+        Icons.star,
+        color: Colors.white.withOpacity(0.8),
+        size: size,
       ),
     );
   }

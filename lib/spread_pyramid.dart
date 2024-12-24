@@ -47,56 +47,70 @@ class _SpreadPyramidState extends State<SpreadPyramid>
       appBar: AppBar(
         title: const Text('Пирамида'),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(12.0),
-            child: Text(
-              'Этот расклад показывает подробный анализ выбора и результата.',
-              style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-              textAlign: TextAlign.center,
+      body: StarryBackground( // Добавляем звездный фон
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(12.0),
+              child: Text(
+                'Этот расклад показывает подробный анализ выбора и результата.',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.white, // Белый цвет текста для контраста
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
-          ),
-          // Верхний уровень пирамиды (Карта 1)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildAnimatedCard(0, -0.6, selectedCards[0], 0),
-            ],
-          ),
-          // Второй уровень пирамиды (Карты 2 и 3)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildAnimatedCard(-0.5, 0, selectedCards[1], 1),
-              _buildAnimatedCard(0.5, 0, selectedCards[2], 2),
-            ],
-          ),
-          // Нижний уровень пирамиды (Карты 4, 5, 6)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildAnimatedCard(-0.8, 0.6, selectedCards[3], 3),
-              _buildAnimatedCard(0, 0.6, selectedCards[4], 4),
-              _buildAnimatedCard(0.8, 0.6, selectedCards[5], 5),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20.0), // Отступ снизу
-            child: ElevatedButton(
-              onPressed: () {
-                _controller.reverse().then((value) {
-                  // Обновляем колоду после завершения анимации
-                  _generatePyramidCards(); // Перетасовываем карты
-                  _controller.forward(from: 0); // Перезапускаем анимацию
-                });
-              },
-              child: const Text('Перетасовать карты'),
+            // Верхний уровень пирамиды (Карта 1)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildAnimatedCard(0, -0.6, selectedCards[0], 0),
+              ],
             ),
-          ),
-        ],
+            // Второй уровень пирамиды (Карты 2 и 3)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildAnimatedCard(-0.5, 0, selectedCards[1], 1),
+                _buildAnimatedCard(0.5, 0, selectedCards[2], 2),
+              ],
+            ),
+            // Нижний уровень пирамиды (Карты 4, 5, 6)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildAnimatedCard(-0.8, 0.6, selectedCards[3], 3),
+                _buildAnimatedCard(0, 0.6, selectedCards[4], 4),
+                _buildAnimatedCard(0.8, 0.6, selectedCards[5], 5),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20.0), // Отступ снизу
+              child: ElevatedButton(
+                onPressed: () {
+                  _controller.reverse().then((value) {
+                    // Обновляем колоду после завершения анимации
+                    _generatePyramidCards(); // Перетасовываем карты
+                    _controller.forward(from: 0); // Перезапускаем анимацию
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple.shade600, // Темный цвет фона для кнопки
+                  foregroundColor: Colors.white, // Белый текст на кнопке
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12), // Размер кнопки
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12), // Округлые углы
+                  ),
+                ),
+                child: const Text('Перетасовать карты'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -156,6 +170,56 @@ class _SpreadPyramidState extends State<SpreadPyramid>
             fit: BoxFit.cover,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class StarryBackground extends StatelessWidget {
+  final Widget child;
+
+  const StarryBackground({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.deepPurple.shade900,
+            Colors.deepPurple.shade400,
+          ],
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Разбросанные звезды на фоне
+          ...List.generate(100, (index) => _buildStar(screenSize)),
+          child,
+        ],
+      ),
+    );
+  }
+
+  // Функция для создания случайно расположенной звезды
+  Widget _buildStar(Size screenSize) {
+    final random = Random();
+    final double top = random.nextDouble() * screenSize.height;
+    final double left = random.nextDouble() * screenSize.width;
+
+    final double size = random.nextDouble() * 3 + 2;
+
+    return Positioned(
+      top: top,
+      left: left,
+      child: Icon(
+        Icons.star,
+        color: Colors.white.withOpacity(0.8),
+        size: size,
       ),
     );
   }
