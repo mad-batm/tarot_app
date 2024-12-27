@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'change_notifier.dart';
 import 'dart:math';
+import 'card_detail_page.dart'; // Импортируем экран описания карты
 
 class VirtualDeckScreen extends StatelessWidget {
   const VirtualDeckScreen({super.key});
@@ -25,11 +26,11 @@ class VirtualDeckScreen extends StatelessWidget {
             },
             itemBuilder: (context) {
               return [
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 0,
                   child: Text('Классическая колода'),
                 ),
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 1,
                   child: Text('Мистическая колода'),
                 ),
@@ -50,33 +51,49 @@ class VirtualDeckScreen extends StatelessWidget {
             ),
             itemCount: deck.length,
             itemBuilder: (context, index) {
-              return Card(
-                color: Colors.deepPurple.shade800, // Однотонный темный фон для карточки
-                elevation: 3,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: Image.asset(
-                        '$imagePath${deck[index]}.jpg',
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons.error);
-                        },
+              return InkWell(
+                onTap: () {
+                  print(
+                      'Tapped on card: ${deck[index]}'); // Добавьте это для проверки
+                  // Передаем имя карты и путь к изображению в экран с деталями карты
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CardDetailPage(
+                        cardName: deck[index], // Передаем имя карты
+                        imagePath: '$imagePath${deck[index]}.jpg',
                       ),
                     ),
-                    // Отображение текста на карточке с белым шрифтом
-                    Padding(
-                      padding: const EdgeInsets.all(3.0),
-                      child: Text(
-                        deck[index].replaceAll('_', ' ').toUpperCase(),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.white, // Белый цвет для текста
+                  );
+                },
+                child: Card(
+                  color: Colors.deepPurple
+                      .shade800, // Однотонный темный фон для карточки
+                  elevation: 3,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Image.asset(
+                          '$imagePath${deck[index]}.jpg',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(Icons.error);
+                          },
                         ),
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: const EdgeInsets.all(3.0),
+                        child: Text(
+                          deck[index].replaceAll('_', ' ').toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -109,7 +126,6 @@ class StarryBackground extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Разбросанные звезды на фоне
           ...List.generate(100, (index) => _buildStar(screenSize)),
           child,
         ],
@@ -117,7 +133,6 @@ class StarryBackground extends StatelessWidget {
     );
   }
 
-  // Функция для создания случайно расположенной звезды
   Widget _buildStar(Size screenSize) {
     final random = Random();
     final double top = random.nextDouble() * screenSize.height;

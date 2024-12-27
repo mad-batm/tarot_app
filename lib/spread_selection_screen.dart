@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'spread_three_cards.dart';
 import 'spread_celtic_cross.dart';
 import 'spread_pyramid.dart';
@@ -51,7 +50,8 @@ class SpreadSelectionPage extends StatelessWidget {
           itemCount: spreads.length,
           itemBuilder: (context, index) {
             return Card(
-              color: Colors.deepPurple.shade800, // Однотонный темный фон для карточки
+              color: Colors
+                  .deepPurple.shade800, // Однотонный темный фон для карточки
               margin: const EdgeInsets.all(8.0),
               elevation: 3,
               child: ListTile(
@@ -74,9 +74,11 @@ class SpreadSelectionPage extends StatelessWidget {
                 ),
                 trailing: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple.shade600, // Темный цвет фона для кнопки
+                    backgroundColor: Colors
+                        .deepPurple.shade600, // Темный цвет фона для кнопки
                     foregroundColor: Colors.white, // Белый текст на кнопке
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12), // Размер кнопки
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12), // Размер кнопки
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12), // Округлые углы
                     ),

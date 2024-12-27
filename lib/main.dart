@@ -5,10 +5,14 @@ import 'virtual_deck_screen.dart';
 import 'change_notifier.dart';
 import 'dart:math';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final deckProvider = DeckProvider();
+  await deckProvider.loadCardDescriptions(); // Загрузка описаний карт из JSON
+
   runApp(
     ChangeNotifierProvider(
-      create: (context) => DeckProvider(),
+      create: (context) => deckProvider,
       child: TarotApp(),
     ),
   );
@@ -39,130 +43,148 @@ class HomePage extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.deepPurple.shade900,
-              Colors.deepPurple.shade400,
-            ],
-          ),
-        ),
-        child: Stack(
-          children: [
-            // Разбросанные звезды на фоне
-            for (int i = 0; i < 100; i++) _buildStar(screenSize),
+      body: Consumer<DeckProvider>(
+        builder: (context, deckProvider, child) {
+          // Проверяем, загрузились ли данные карт
+          if (deckProvider.isLoading) {
+            return Center(
+                child:
+                    CircularProgressIndicator()); // Показываем индикатор загрузки
+          }
 
-            // Луна, увеличенная, повернутая и прижата к левому краю
-            Positioned(
-              top: 50, // Располагаем немного ниже верхнего края
-              left: 20, // Прижимаем к левому краю экрана
-              child: Transform.rotate(
-                angle: -pi / 6, // Поворот на -30 градусов
-                child: Icon(
-                  Icons.nightlight_round, // Иконка луны
-                  color: Colors.white, // Белый цвет
-                  size: 80, // Увеличенный размер иконки
-                ),
-              ),
-            ),
-
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Кнопка "Выбрать расклад" с градиентом и границей
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SpreadSelectionPage()),
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Colors.deepPurple.shade600,
-                            Colors.blueAccent.shade700,
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(
-                          color: Colors.deepPurple.shade800, // Явно видимая темная граница
-                          width: 3, // Толщина границы
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            offset: Offset(0, 4),
-                            blurRadius: 6,
-                          ),
-                        ],
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 16),
-                      child: const Text(
-                        'Выбрать расклад',
-                        style: TextStyle(
-                          fontSize: 22, // Увеличенный шрифт
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 50), // Увеличиваем расстояние между кнопками
-                  // Кнопка "Открыть виртуальную колоду" с градиентом и границей
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => VirtualDeckScreen()),
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Colors.deepPurple.shade600,
-                            Colors.blueAccent.shade700,
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(
-                          color: Colors.deepPurple.shade800, // Явно видимая темная граница
-                          width: 3, // Толщина границы
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            offset: Offset(0, 4),
-                            blurRadius: 6,
-                          ),
-                        ],
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 16),
-                      child: const Text(
-                        'Открыть виртуальную колоду',
-                        style: TextStyle(
-                          fontSize: 22, // Увеличенный шрифт
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
+          return Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.deepPurple.shade900,
+                  Colors.deepPurple.shade400,
                 ],
               ),
             ),
-          ],
-        ),
+            child: Stack(
+              children: [
+                // Разбросанные звезды на фоне
+                for (int i = 0; i < 100; i++) _buildStar(screenSize),
+
+                // Луна, увеличенная, повернутая и прижата к левому краю
+                Positioned(
+                  top: 50, // Располагаем немного ниже верхнего края
+                  left: 20, // Прижимаем к левому краю экрана
+                  child: Transform.rotate(
+                    angle: -pi / 6, // Поворот на -30 градусов
+                    child: Icon(
+                      Icons.nightlight_round, // Иконка луны
+                      color: Colors.white, // Белый цвет
+                      size: 80, // Увеличенный размер иконки
+                    ),
+                  ),
+                ),
+
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Кнопка "Выбрать расклад" с градиентом и границей
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SpreadSelectionPage()),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Colors.deepPurple.shade600,
+                                Colors.blueAccent.shade700,
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              color: Colors.deepPurple
+                                  .shade800, // Явно видимая темная граница
+                              width: 3, // Толщина границы
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                offset: Offset(0, 4),
+                                blurRadius: 6,
+                              ),
+                            ],
+                          ),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 16),
+                          child: const Text(
+                            'Выбрать расклад',
+                            style: TextStyle(
+                              fontSize: 22, // Увеличенный шрифт
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                          height: 50), // Увеличиваем расстояние между кнопками
+                      // Кнопка "Открыть виртуальную колоду" с градиентом и границей
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => VirtualDeckScreen()),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Colors.deepPurple.shade600,
+                                Colors.blueAccent.shade700,
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              color: Colors.deepPurple
+                                  .shade800, // Явно видимая темная граница
+                              width: 3, // Толщина границы
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                offset: Offset(0, 4),
+                                blurRadius: 6,
+                              ),
+                            ],
+                          ),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 16),
+                          child: const Text(
+                            'Открыть виртуальную колоду',
+                            style: TextStyle(
+                              fontSize: 22, // Увеличенный шрифт
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
