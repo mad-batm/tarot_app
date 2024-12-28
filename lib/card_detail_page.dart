@@ -83,7 +83,7 @@ class CardDetailPage extends StatelessWidget {
 
               // Полное описание карты
               Text(
-                'Полное описание: ${cardInfo['description'] ?? 'Не указано'}',
+                'Совет дня': ${cardInfo['description'] ?? 'Не указано'}',
                 style: const TextStyle(fontSize: 16),
                 textAlign: TextAlign.center,
               ),
